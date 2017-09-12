@@ -44,7 +44,7 @@
 			}
 			console.log('passed test 5');
 		});
-		console.log('passed all tests');
+		console.log('completed all tests all tests');
 		return true;
 	}
 
