@@ -1,6 +1,6 @@
 (function (){
 
-	function installer(arg1){
+	function installer(arg1, cb){
 		//console.log('running test with: ', arg1);
 		if (arg1 == undefined){
 			return false;
@@ -9,47 +9,67 @@
 		var packNum = 0;
 		for(var index in arg1){
 			var packageVal =  arg1[index].split(": ");
-			hierarchy[packNum] =  {package: packageVal[0], dep: packageVal[1], visited: false};
+			hierarchy[packNum] =  {package: packageVal[0], dep: packageVal[1], visited: false, sorted: false};
 			
 			packNum++;
 		}
-		var final = topoSort(hierarchy);
-		
-		var trimmed = final.substring(0, final.length -2);
-		return trimmed;
+		var route = [];
+		topoSort(hierarchy, route, function(route){
+			return printer(route, function(result){
+				console.log('result of the printer: ',result);
+				cb(result);
+			})
+		});
+
 	}
-	function topoSort(deps){
-		var route = "";
-		console.log('number of deps ',deps.length);
+
+	function printer(route, cb){
+		var installList = "";
+		for(var x = route.length; x <0; x--){
+			installList += route[x];
+			installList += ", ";
+		}
+		installList += route[0];
+		console.log('right before it goes out the door', installList);
+		cb(installList);
+	}
+
+	function topoSort(deps, route, cb){
+		var route = [];
 		for (var index in deps){
 			if(deps[index].visited === false){
-				route  += sortReccursion(deps, route, index);
-				route += ", ";
+				sortReccursion(deps, route, index);
 			}
+			//console.log('updated route printout', route);
 		}
-		return route;
+		cb(route);
 
 	}
 	function sortReccursion(verticies, route, i){
-		console.log('recurring', route, verticies);
-		if (verticies[i].visited === true) {
-			console.log('looping deps');
-			return false;
-		};
 		verticies[i].visited = true;
-		for(var x in verticies){
-			console.log('i check the whole stack', verticies[x].package);
-			if(verticies[i].dep === verticies[x].package ){
-				console.log('heres that boolshiz', verticies[i].dep);;;;
-				return sortReccursion(verticies, route, x);
+		if(verticies[i].dep != ''){
+			var foundDep;
+			for(var index in verticies){
+				if (verticies[index].package === verticies[i].dep){
+					foundDep = verticies[index];
+					if(!foundDep.visited){
+						sortReccursion(verticies, route, index);
+					}
+					else if(!foundDep.sorted){
+						route = false;
+						return false;
+					}
+				}
 			}
 		}
-		console.log('i end the reccursion: ', verticies[i].package);
-		return verticies[i].package;
+		console.log('i get out', verticies[i]);
+		verticies[i].sorted = true;
+		route.push(verticies[i].package);
+		
 	}
 	module.exports = {
 		installer: installer,
 		topoSort: topoSort,
 		sortReccursion: sortReccursion
 	}
-})()
+})();
