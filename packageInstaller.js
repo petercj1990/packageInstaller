@@ -1,54 +1,51 @@
 (function (){
 
 	function installer(arg1){
-		console.log('running test with: ', arg1);
+		//console.log('running test with: ', arg1);
 		if (arg1 == undefined){
 			return false;
 		};
 		var hierarchy = [];
 		var packNum = 0;
-		for(var package in arg1){
-			var packageVal =  package.split(":");
-			console.log('here be your package val', packageVal);
-			hierarchy[packNum] =  {pakage: packageVal[0], dep: packageVal[1], visited: false};
+		for(var index in arg1){
+			var packageVal =  arg1[index].split(": ");
+			hierarchy[packNum] =  {package: packageVal[0], dep: packageVal[1], visited: false};
 			
 			packNum++;
 		}
-		console.log(hierarchy);
-		return topoSort(hierarchy);
+		var final = topoSort(hierarchy);
+		
+		var trimmed = final.substring(0, final.length -2);
+		return trimmed;
 	}
 	function topoSort(deps){
-
-		for(var x = 0; x < deps.lenght; x++){
-			deps[x].visited = false;
-		}
 		var route = "";
-		for (var x = 0; x < deps.lenght; x++){
-			if(deps[x].visited===false){
-				sortReccursion(deps, route, x);
+		console.log('number of deps ',deps.length);
+		for (var index in deps){
+			if(deps[index].visited === false){
+				route  += sortReccursion(deps, route, index);
+				route += ", ";
 			}
-			console.log()
-			route += deps[x].package;
 		}
-		console.log(route);
-
 		return route;
+
 	}
-	function sortReccursion(dependencies, route, i){
-		console.log('recurring', route, i);
-		if(dependencies[i].visited === true){
+	function sortReccursion(verticies, route, i){
+		console.log('recurring', route, verticies);
+		if (verticies[i].visited === true) {
+			console.log('looping deps');
 			return false;
-		}
-		dependencies[i].visited = true;
-		if(dependencies[i].dep = ""){
-			return true;
-		}
-		for(var x = 0; x < dependencies.lenght; x++){
-			if(dependencies[i].dep === dependencies[x].package ){
-				return sortReccursion(dependencies, route, x);
+		};
+		verticies[i].visited = true;
+		for(var x in verticies){
+			console.log('i check the whole stack', verticies[x].package);
+			if(verticies[i].dep === verticies[x].package ){
+				console.log('heres that boolshiz', verticies[i].dep);;;;
+				return sortReccursion(verticies, route, x);
 			}
 		}
-
+		console.log('i end the reccursion: ', verticies[i].package);
+		return verticies[i].package;
 	}
 	module.exports = {
 		installer: installer,
